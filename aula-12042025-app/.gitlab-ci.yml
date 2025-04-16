@@ -1,0 +1,28 @@
+stages:
+  - build
+  - deploy
+
+variables:
+  VERSION: "4.0-app"
+
+create-images:
+  stage: build
+  tags:
+    - AWS
+  before_script:
+    - docker login -u $REGISTRY_USER -p $REGISTRY_PASS
+  script:
+    - docker build -t thecalifornia16/aula-12042025-app:$VERSION app/.
+    - docker push thecalifornia16/aula-12042025-app:$VERSION
+  
+run_docker:
+  stage: deploy
+  tags: 
+    - AWS
+  before_script:
+    - docker rm -f app-docker
+    #- docker rmi $(docker images -q)
+
+  script:
+    - docker pull thecalifornia16/aula-12042025-app:$VERSION
+    - docker run -dti -p 80:80 --name app-docker thecalifornia16/aula-12042025-app:$VERSION
